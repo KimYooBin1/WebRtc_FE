@@ -16,9 +16,7 @@ export default function mainPage(): JSX.Element {
             })
             .catch(()=>{console.log("Error")})
     }, []);
-    function onclickBtn(id:number):void{
 
-    }
     return (
         <div>
             <h1>chatRoom 목록</h1>
