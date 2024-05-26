@@ -10,6 +10,7 @@ export default function mainPage():JSX.Element {
     const [check, setCheck] = useState(true);
     const [title, setTitle] = useState("");
     const [password, setPassword] = useState("");
+    const [checkDup, setCheckDup] = useState(true);
     const { onClickMoveToPage } = useMoveToPage();
 
     useEffect(()=>{
@@ -28,10 +29,15 @@ export default function mainPage():JSX.Element {
     };
 
     const handleOk = () => {
+        if(!checkDup){
+            alert("chatroom 중복체크 먼제 해주세요")
+            return
+        }
         setIsModalOpen(false);
         console.log(title, password);
         setTitle("");
         setPassword("");
+        setCheckDup(false);
         axios.post("http://localhost:8080/chatroom", {
             roomName:title,
             limitUserCnt:(document.getElementById("limitCnt") as HTMLInputElement).value,
@@ -50,6 +56,7 @@ export default function mainPage():JSX.Element {
         setIsModalOpen(false);
         setTitle("");
         setPassword("");
+        setCheckDup(false);
     };
     const checkBox = (e:ChangeEvent<HTMLInputElement>) =>{
         console.log(e.target.value);
@@ -65,6 +72,23 @@ export default function mainPage():JSX.Element {
     }
 
 
+    function onClickDupBtn() {
+        console.log(title)
+        axios.post("http://localhost:8080/chatroom/duplication", {roomName : title})
+            .then((result) =>{
+                console.log(result.data)
+                if(result.data){
+                    setCheckDup(true);
+                }
+                else{
+                    setCheckDup(false);
+                    alert("중복된 chatroom name 입니다")
+                }
+            })
+            .catch(
+
+            )
+    }
 
     return (
         <div>
@@ -78,7 +102,7 @@ export default function mainPage():JSX.Element {
             </div>
             <button onClick={showModal}>계시글 등록</button>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <input id = {"titleInput"} placeholder={"방이름"} value={title} onChange={changeTitle}/><br/>
+                <input id = {"titleInput"} placeholder={"방이름"} value={title} onChange={changeTitle}/><button onClick={onClickDupBtn}>중복 체크</button><br/>
                 <input type="checkbox" onChange={checkBox}/>비밀번호 여부<br/>
                 <input id = {"passwordInput"} placeholder={"비밀번호"} disabled={check} value={password} onChange={changePW}/><br/>
                 <div>인원수(2~10)</div>
