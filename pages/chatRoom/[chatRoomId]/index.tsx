@@ -2,6 +2,7 @@ import {useRouter} from "next/router";
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
 import {MouseEventHandler, useEffect, useRef} from "react";
+import axios from "axios";
 
 export default function chatRoom():JSX.Element{
 
@@ -16,7 +17,18 @@ export default function chatRoom():JSX.Element{
 
         var socket = new SockJS('http://localhost:8080/websocket');
         stompClient = Stomp.over(socket);
-        stompClient.connect({}, onConnected);
+        stompClient.connect({}, () => {
+            onConnected();
+            axios.get('http://localhost:8080/chatroom/'+roomId+"/users")
+                .then((result) =>{
+                        console.log(result);
+                    }
+                )
+                .catch(
+                    // TODO : 인원이 없을떄?
+                )
+        });
+
     }
 
     function onConnected(){
@@ -79,14 +91,30 @@ export default function chatRoom():JSX.Element{
         inputElement.value = "";
     }
 
+    function onClickB(){
+        axios.get('http://localhost:8080/chatroom/'+roomId+"/users")
+            .then((result) =>{
+                    console.log(result);
+                }
+            )
+            .catch(
+                // TODO : 인원이 없을떄?
+            )
+    }
+
     return(
         <>
             <div>현재 방 : {roomId}</div>
             <button onClick={connect} id={"joinArea"}>방 참가</button>
+            <div>
+                <h1>현재 유저</h1>
+                <div id = {'chatRoomUsers'}></div>
+            </div>
             <div id = "messageArea"></div>
             <div>
                 <input id={"inputText"}/><button onClick={sendMessage}>전송</button>
             </div>
+            <button onClick={onClickB}>123</button>
         </>
     )
 }
