@@ -16,12 +16,18 @@ export default function chatRoom():JSX.Element{
         document.getElementById('joinArea').style.visibility = "hidden";
 
         var socket = new SockJS('http://localhost:8080/websocket');
+        var userListElement = document.getElementById("chatRoomUsers");
         stompClient = Stomp.over(socket);
         stompClient.connect({}, () => {
             onConnected();
             axios.get('http://localhost:8080/chatroom/'+roomId+"/users")
                 .then((result) =>{
-                        console.log(result);
+                    const userList = result.data;
+                    userList.forEach((user:any)=>{
+                        console.log(user);
+                        userListElement?.append(document.createElement('l1').innerText = user.name)
+                    })
+                        // console.log("result = " + result.data);
                     }
                 )
                 .catch(
@@ -106,15 +112,15 @@ export default function chatRoom():JSX.Element{
         <>
             <div>현재 방 : {roomId}</div>
             <button onClick={connect} id={"joinArea"}>방 참가</button>
-            <div>
+            {/*유저 목록 칸은 red background color 로 구분*/}
+            <div style={{border: '1px solid red'}}>
                 <h1>현재 유저</h1>
-                <div id = {'chatRoomUsers'}></div>
+                <p id = {'chatRoomUsers'}></p>
             </div>
             <div id = "messageArea"></div>
             <div>
                 <input id={"inputText"}/><button onClick={sendMessage}>전송</button>
             </div>
-            <button onClick={onClickB}>123</button>
         </>
     )
 }
