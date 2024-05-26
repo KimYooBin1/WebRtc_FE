@@ -117,7 +117,7 @@ export default function chatRoom():JSX.Element{
                 <h1>현재 유저</h1>
                 <p id = {'chatRoomUsers'}></p>
             </div>
-            <div id = "messageArea"></div>
+            <div id = "messageArea" style={{border: '1px solid gray'}}></div>
             <div>
                 <input id={"inputText"}/><button onClick={sendMessage}>전송</button>
             </div>
