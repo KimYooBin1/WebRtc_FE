@@ -19,7 +19,9 @@ export default function chatRoom():JSX.Element{
         stompClient = Stomp.over(socket);
         stompClient.connect({}, () => {
             onConnected()
-            axios.get('http://localhost:8080/chatroom/' + roomId + "/users")
+            axios.get('http://localhost:8080/chatroom/' + roomId + "/users", {headers:{
+                    Authorization: "Bearer " +window.localStorage.getItem("access_token"),
+                }})
                 .then((result) => {
                         console.log("getUsers start")
                         const userList = result.data;
@@ -82,17 +84,6 @@ export default function chatRoom():JSX.Element{
             }),
         })
         inputElement.value = "";
-    }
-
-    function onClickB(){
-        axios.get('http://localhost:8080/chatroom/'+roomId+"/users")
-            .then((result) =>{
-                    console.log(result);
-                }
-            )
-            .catch(
-                // TODO : 인원이 없을떄?
-            )
     }
 
     return(

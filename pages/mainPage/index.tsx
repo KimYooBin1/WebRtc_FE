@@ -123,21 +123,24 @@ export default function mainPage():JSX.Element {
 
     function onClickDupBtn() {
         console.log(title)
-        axios.post("http://localhost:8080/chatroom/duplication", {roomName : title})
-            .then((result) =>{
+        axios.post("http://localhost:8080/chatroom/duplication", {roomName: title}, {
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
+            }
+        })
+            .then((result) => {
                 console.log(result.data)
-                if(result.data){
+                if (result.data) {
                     setCheckDup(true);
                     alert("사용 가능한 chatroom name 입니다")
-                }
-                else{
+                } else {
                     setCheckDup(false);
                     alert("중복된 chatroom name 입니다")
                 }
             })
             .catch(
 
-            )
+            );
     }
 
     const changeInput = (e: ChangeEvent<HTMLInputElement>, type: String) => {
