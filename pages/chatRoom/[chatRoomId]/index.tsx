@@ -1,7 +1,6 @@
 import {useRouter} from "next/router";
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
-import {MouseEventHandler, useEffect, useRef} from "react";
 import axios from "axios";
 
 export default function chatRoom():JSX.Element{
@@ -39,23 +38,11 @@ export default function chatRoom():JSX.Element{
 
     function onConnected() {
         stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
-
-        var json = JSON.stringify({
-                sender: "sender",
-                type: "ENTER"
-            }
-        );
-        console.log(json);
-        // stompClient.send('/app/chatroom/' + roomId + '/join',
-
-        //     {},
-        //     json
-        // );
         stompClient.publish({
             destination: `/app/chatroom/${roomId}/join`,
             body: JSON.stringify({
                 roomId: roomId,
-                sender: "sender",
+                sender: window.localStorage.getItem("name"),
                 type: "ENTER"
             }),
         })
@@ -87,10 +74,9 @@ export default function chatRoom():JSX.Element{
         const message = inputElement.value
         stompClient.publish({
             destination: `/app/chatroom/${roomId}/send`,
-            // TODO : sender 제대로 표기하기
             body: JSON.stringify({
                 roomId: roomId,
-                sender: "sender",
+                sender: window.localStorage.getItem("name"),
                 type: "TALK",
                 message
             }),
