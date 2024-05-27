@@ -3,6 +3,8 @@ import axios from "axios";
 import {ChatRoomType} from "./mainPage.type";
 import {useMoveToPage} from "../../src/commponent/useMoveToPage";
 import {Modal} from "antd";
+import {redirect} from "next/dist/server/api-utils";
+import {useRouter} from "next/router";
 
 export default function mainPage():JSX.Element {
 
@@ -12,6 +14,7 @@ export default function mainPage():JSX.Element {
     const [password, setPassword] = useState("");
     const [checkDup, setCheckDup] = useState(true);
     const { onClickMoveToPage } = useMoveToPage();
+    const router = useRouter();
 
     useEffect(()=>{
         axios.get("http://localhost:8080/chatroom")
@@ -45,6 +48,7 @@ export default function mainPage():JSX.Element {
         })
             .then((result) =>{
                 console.log(result.data)
+                router.push(`/chatRoom/${result.data.id}`);
                 }
             )
             .catch(
@@ -79,6 +83,7 @@ export default function mainPage():JSX.Element {
                 console.log(result.data)
                 if(result.data){
                     setCheckDup(true);
+                    alert("사용 가능한 chatroom name 입니다")
                 }
                 else{
                     setCheckDup(false);
@@ -106,7 +111,7 @@ export default function mainPage():JSX.Element {
                 <input type="checkbox" onChange={checkBox}/>비밀번호 여부<br/>
                 <input id = {"passwordInput"} placeholder={"비밀번호"} disabled={check} value={password} onChange={changePW}/><br/>
                 <div>인원수(2~10)</div>
-                <input id = {"limitCnt"}  type="number" />
+                <input id = {"limitCnt"} defaultValue={2} type="number" />
             </Modal>
         </div>
 

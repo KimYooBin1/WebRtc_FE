@@ -19,25 +19,25 @@ export default function chatRoom():JSX.Element{
         var userListElement = document.getElementById("chatRoomUsers");
         stompClient = Stomp.over(socket);
         stompClient.connect({}, () => {
-            onConnected();
-            axios.get('http://localhost:8080/chatroom/'+roomId+"/users")
-                .then((result) =>{
-                    const userList = result.data;
-                    userList.forEach((user:any)=>{
-                        console.log(user);
-                        userListElement?.append(document.createElement('l1').innerText = user.name)
-                    })
+            onConnected()
+            axios.get('http://localhost:8080/chatroom/' + roomId + "/users")
+                .then((result) => {
+                        console.log("getUsers start")
+                        const userList = result.data;
+                        userList.forEach((user: any) => {
+                            console.log(user);
+                            userListElement?.append(document.createElement('l1').innerText = user.name)
+                        })
                         // console.log("result = " + result.data);
                     }
                 )
                 .catch(
                     // TODO : 인원이 없을떄?
-                )
+                );
         });
-
     }
 
-    function onConnected(){
+    function onConnected() {
         stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
 
         var json = JSON.stringify({
@@ -47,6 +47,7 @@ export default function chatRoom():JSX.Element{
         );
         console.log(json);
         // stompClient.send('/app/chatroom/' + roomId + '/join',
+
         //     {},
         //     json
         // );
