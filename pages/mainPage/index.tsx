@@ -71,12 +71,14 @@ export default function mainPage():JSX.Element {
             )
     };
     const handleLogin = () => {
-        axios.post("http://localhost:8080/user/login", {
-            name:loginName,
-            password:loginPW
-        }).then((result)=>{
-            alert(`안녕하세요! ${result.data.name}님`)
-            window.localStorage.setItem("name", result.data.name);
+        const formData = new FormData();
+        formData.append("username", loginName);
+        formData.append("password", loginPW);
+        axios.post("http://localhost:8080/login", formData).then((result)=>{
+            alert(`안녕하세요! ${result.data}님`)
+            const token = result.headers['authorization'];
+            window.localStorage.setItem("access_token", token.split(' ')[1]);
+            window.localStorage.setItem("name", result.data);
         }).catch((e) =>{
             alert(e.message);
         })
