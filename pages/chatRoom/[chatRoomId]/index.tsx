@@ -59,6 +59,9 @@ export default function chatRoom():JSX.Element{
         else if(chat.type == "TALK"){
             messageElement.innerText = chat.sender;
         }
+        else if (chat.type == "LEAVE") {
+            messageElement.innerText = "leave"
+        }
         var textElement = document.createElement('p');
         var messageText = document.createTextNode(chat.message);
         textElement.appendChild(messageText);
