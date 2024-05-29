@@ -17,11 +17,14 @@ export default function chatRoom():JSX.Element{
         var socket = new SockJS('http://localhost:8080/websocket');
         var userListElement = document.getElementById("chatRoomUsers");
         stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
+        stompClient.connect({
+            Authorization: "Bearer " + window.localStorage.getItem("access_token")}, () => {
             onConnected()
-            axios.get('http://localhost:8080/chatroom/' + roomId + "/users", {headers:{
-                    Authorization: "Bearer " +window.localStorage.getItem("access_token"),
-                }})
+            axios.get('http://localhost:8080/chatroom/' + roomId + "/users", {
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem("access_token"),
+                }
+            })
                 .then((result) => {
                         console.log("getUsers start")
                         const userList = result.data;
@@ -39,7 +42,8 @@ export default function chatRoom():JSX.Element{
     }
 
     function onConnected() {
-        stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
+        stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived,{
+            Authorization: "Bearer " +window.localStorage.getItem("access_token")});
         stompClient.publish({
             destination: `/app/chatroom/${roomId}/join`,
             body: JSON.stringify({
@@ -47,6 +51,9 @@ export default function chatRoom():JSX.Element{
                 sender: window.localStorage.getItem("name"),
                 type: "ENTER"
             }),
+            headers:{
+                Authorization: "Bearer " +window.localStorage.getItem("access_token")
+            }
         })
     }
 
@@ -84,7 +91,9 @@ export default function chatRoom():JSX.Element{
                 sender: window.localStorage.getItem("name"),
                 type: "TALK",
                 message
-            }),
+            }), headers: {
+                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
+            },
         })
         inputElement.value = "";
     }
