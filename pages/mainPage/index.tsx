@@ -60,7 +60,10 @@ export default function mainPage():JSX.Element {
             roomName:title,
             limitUserCnt:(document.getElementById("limitCnt") as HTMLInputElement).value,
             password
-        })
+        }, {
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
+            }})
             .then((result) =>{
                     console.log(result.data)
                     router.push(`/chatRoom/${result.data.id}`);
@@ -181,11 +184,14 @@ export default function mainPage():JSX.Element {
     return (
         <div>
             <h1>chatRoom 목록</h1>
-            <div>
+            <div style={{border:"1px solid blue"}}>
                 {
                     chatRoomList.length != 0 ?
                     chatRoomList.map((chatroom:ChatRoomType) => {
-                        return <div key={chatroom.id} onClick={onClickMoveToPage(`/chatRoom/${chatroom.id}`)}>{chatroom.roomName}</div>;}) : "방이 없습니다"
+                        return <div key={chatroom.id} onClick={onClickMoveToPage(`/chatRoom/${chatroom.id}`)}>
+                            <span>room name : {chatroom.roomName}</span>
+                            <span>count : {chatroom.userCnt}/{chatroom.limitUserCnt}</span>
+                        </div>;}) : "방이 없습니다"
                 }
             </div>
             <button onClick={() => showModal(1)}>계시글 등록</button>
