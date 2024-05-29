@@ -164,6 +164,20 @@ export default function mainPage():JSX.Element {
         }
 
     };
+    const onClickTest = () =>{
+        axios.get("http://localhost:8080/test", {
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
+            }
+        }).then((result) => {
+                console.log(result);
+            }
+        ).catch((e) => {
+                console.log(e)
+                alert(e.response.data.message);
+            }
+        );
+    }
     return (
         <div>
             <h1>chatRoom 목록</h1>
@@ -176,6 +190,7 @@ export default function mainPage():JSX.Element {
             </div>
             <button onClick={() => showModal(1)}>계시글 등록</button>
             <button onClick={() => showModal(2)}>login</button>
+            <button onClick={onClickTest}>Error Response test</button>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <input id = {"titleInput"} placeholder={"방이름"} value={title} onChange={changeTitle}/><button onClick={onClickDupBtn}>중복 체크</button><br/>
                 <input type="checkbox" onChange={checkBox}/>비밀번호 여부<br/>
