@@ -20,7 +20,7 @@ export default function mainPage():JSX.Element {
     const [phone, setPhone] = useState("");
 
 
-    const { onClickMoveToPage } = useMoveToPage();
+    const { onClickMoveToPage, onClickActionAndMoveToPage } = useMoveToPage();
     const router = useRouter();
 
     useEffect(()=>{
@@ -181,6 +181,21 @@ export default function mainPage():JSX.Element {
             }
         );
     }
+    const checkRoom = (chatroom: ChatRoomType) => {
+        console.log(chatroom.id);
+        if(chatroom.limitUserCnt <= chatroom.userCnt){
+            alert("인원이 가득 찼습니다");
+            return ;
+        }
+        if(chatroom.password != null){
+            const result = prompt("비밀번호가 설정되어 있습니다","비밀번호를 입력해주세요");
+            if(result != chatroom.password) {
+                alert("비밀번호가 틀립니다!")
+                return;
+            }
+        }
+        router.push(`/chatRoom/${chatroom.id}`)
+    };
     return (
         <div>
             <h1>chatRoom 목록</h1>
@@ -188,7 +203,7 @@ export default function mainPage():JSX.Element {
                 {
                     chatRoomList.length != 0 ?
                     chatRoomList.map((chatroom:ChatRoomType) => {
-                        return <div key={chatroom.id} onClick={onClickMoveToPage(`/chatRoom/${chatroom.id}`)}>
+                        return <div key={chatroom.id} onClick={() =>checkRoom(chatroom)}>
                             <span>room name : {chatroom.roomName}</span>
                             <span>count : {chatroom.userCnt}/{chatroom.limitUserCnt}</span>
                         </div>;}) : "방이 없습니다"
