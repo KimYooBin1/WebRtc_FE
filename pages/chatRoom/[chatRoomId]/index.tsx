@@ -2,8 +2,23 @@ import {useRouter} from "next/router";
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
 import axios from "axios";
+import {useEffect} from "react";
+import {history} from "../../../src/commponent/history";
 
 export default function chatRoom():JSX.Element{
+    useEffect(() => {
+        const listenBackEvent = () => {
+            // 뒤로가기 할 때 수행할 동작을 적는다
+            alert("채팅방이 종료 됩니다")
+        };
+
+        return history.listen(({action}) => {
+            if (action === "POP") {
+                listenBackEvent();
+            }
+        });
+    }, []);
+
 
     const router = useRouter();
     // @ts-ignore
