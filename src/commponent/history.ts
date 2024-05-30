@@ -1,3 +1,5 @@
-import {createBrowserHistory} from "history";
+import { createBrowserHistory, createMemoryHistory } from 'history';
 
-export const history = createBrowserHistory();
+const isServer = typeof window === 'undefined';
+
+export const history = isServer ? createMemoryHistory() : createBrowserHistory();
