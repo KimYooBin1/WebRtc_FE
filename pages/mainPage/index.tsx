@@ -4,7 +4,6 @@ import {ChatRoomType} from "./mainPage.type";
 import {Button, Modal} from "antd";
 import {useRouter} from "next/router";
 import {useStompConnect} from "../../src/common/useStompConnect";
-import {useMoveToPage} from "../../src/commponent/useMoveToPage";
 
 export default function MainPage():JSX.Element {
 
@@ -20,7 +19,6 @@ export default function MainPage():JSX.Element {
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     // const [stompClient, setStompClient]  = useRecoilState(stompClientState);
-    const {onClickMoveToPage} = useMoveToPage()
     const {checkRoom} = useStompConnect();
 
     // var stompClient: any = null;
@@ -47,9 +45,7 @@ export default function MainPage():JSX.Element {
             setIsModalOpen1(true);
         }
     };
-    const showModal1 = () => {
-        setIsModalOpen1(true);
-    };
+
     const handleOk = () => {
         if(!checkDup){
             alert("chatroom 중복체크 먼제 해주세요")
@@ -69,9 +65,8 @@ export default function MainPage():JSX.Element {
                 Authorization: "Bearer " + window.localStorage.getItem("access_token"),
             }})
             .then((result) =>{
-                    console.log(result.data)
-                    checkRoom(result.data.id)
-                    // navigator(`/chatRoom/${result.data.id}`, {state: {stompClient: stompClient}});
+                    console.log("Data = ", result.data)
+                    router.push(`/chatRoom/${result.data.id}`);
                 }
             )
             .catch(
@@ -98,7 +93,7 @@ export default function MainPage():JSX.Element {
             password:signPW,
             phoneNumber:phone,
             email
-        }).then((result)=>{
+        }).then(()=>{
             alert("회원가입이 정상적으로 진행되었습니다")
         }).catch((e) => {
             alert(e.message)
