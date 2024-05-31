@@ -100,5 +100,11 @@ export const useStompConnect = () =>{
         router.push(`/chatRoom/${chatroom.id}`);
     }
 
-    return {connect, sendMessage, checkRoom}
+    const disconnect = () => {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+    }
+
+    return {connect, disconnect, sendMessage, checkRoom}
 }
