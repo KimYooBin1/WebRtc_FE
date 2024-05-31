@@ -3,6 +3,7 @@ import {ChatRoomType} from "../../pages/mainPage/mainPage.type";
 import SockJS from "sockjs-client";
 import {CompatClient, Stomp} from "@stomp/stompjs";
 import {useEffect} from "react";
+import axios from "axios";
 
 export const useStompConnect = () =>{
     useEffect(() => {
@@ -14,12 +15,26 @@ export const useStompConnect = () =>{
     const onMessageReceived = (payload: any) => {
         var chat = JSON.parse(payload.body);
         var messageElement = document.createElement("li");
-        if (chat.type == "ENTER") {
-            messageElement.innerText = "enter";
+        var userListElement = document.getElementById("chatRoomUsers");
+        if (chat.type == "ENTER" || chat.type == "LEAVE") {
+            messageElement.innerText = chat.type == "ENTER"?"enter":"leave";
+            axios.get('http://localhost:8080/chatroom/' + router.query.chatRoomId + "/users", {
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem("access_token"),
+                }
+            })
+                .then((result) => {
+                        while(userListElement?.firstChild){
+                            userListElement.removeChild(userListElement.firstChild);
+                        }
+                        const userList = result.data;
+                        userList.forEach((user: any) => {
+                            userListElement?.append(document.createElement('l1').innerText = user.name)
+                        })
+                    }
+                );
         } else if (chat.type == "TALK") {
             messageElement.innerText = chat.sender;
-        } else if (chat.type == "LEAVE") {
-            messageElement.innerText = "leave"
         }
         var textElement = document.createElement('p');
         var messageText = document.createTextNode(chat.message);
@@ -56,13 +71,6 @@ export const useStompConnect = () =>{
         stompClient.connect({
             Authorization: "Bearer " + window.localStorage.getItem("access_token")
         }, () => {
-            console.log("main SC = {}", stompClient);
-            // router.push({pathname: `/chatRoom/${chatroom.id}`, query: {stompClient: JSON.stringify(stompClient)}});
-            //     window.localStorage.setItem("socket", JSON.stringify(socket));
-            //     router.push({pathname:`/chatRoom/${chatroom.id}`,query: JSON.stringify(socket)
-            // });
-            // navigator(`/chatRoom/${chatroom.id}`, {state:{stompClient: stompClient}})
-
             onConnected();
         })
 
