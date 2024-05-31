@@ -1,17 +1,16 @@
 import {useRouter} from "next/router";
-import SockJS from "sockjs-client";
-import {Stomp} from "@stomp/stompjs";
-import axios from "axios";
 import {useEffect} from "react";
-import {history} from "../../../src/commponent/history";
+import {history} from "../../../src/commponent/history"
+import {useStompConnect} from "../../../src/common/useStompConnect";
 
 export default function chatRoom():JSX.Element{
     useEffect(() => {
+        connect();
+        console.log("room join");
         const listenBackEvent = () => {
             // 뒤로가기 할 때 수행할 동작을 적는다
             alert("채팅방이 종료 됩니다")
         };
-
         return history.listen(({action}) => {
             if (action === "POP") {
                 listenBackEvent();
@@ -19,104 +18,15 @@ export default function chatRoom():JSX.Element{
         });
     }, []);
 
-
     const router = useRouter();
-    // @ts-ignore
-    const roomId = parseInt(router.query.chatRoomId, 10);
+    const roomId = router.query.chatRoomId;
+    const {sendMessage, connect} = useStompConnect();
 
-    var stompClient: any = null;
-    function connect(){
-        // @ts-ignore
-        document.getElementById('joinArea').style.visibility = "hidden";
 
-        var socket = new SockJS('http://localhost:8080/websocket');
-        var userListElement = document.getElementById("chatRoomUsers");
-        stompClient = Stomp.over(socket);
-        stompClient.connect({
-            Authorization: "Bearer " + window.localStorage.getItem("access_token")}, () => {
-            onConnected()
-            axios.get('http://localhost:8080/chatroom/' + roomId + "/users", {
-                headers: {
-                    Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-                }
-            })
-                .then((result) => {
-                        console.log("getUsers start")
-                        const userList = result.data;
-                        userList.forEach((user: any) => {
-                            console.log(user);
-                            userListElement?.append(document.createElement('l1').innerText = user.name)
-                        })
-                        // console.log("result = " + result.data);
-                    }
-                )
-                .catch(
-                    // TODO : 인원이 없을떄?
-                );
-        });
-    }
-
-    function onConnected() {
-        stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived,{
-            Authorization: "Bearer " +window.localStorage.getItem("access_token")});
-        stompClient.publish({
-            destination: `/app/chatroom/${roomId}/join`,
-            body: JSON.stringify({
-                roomId: roomId,
-                sender: window.localStorage.getItem("name"),
-                type: "ENTER"
-            }),
-            headers:{
-                Authorization: "Bearer " +window.localStorage.getItem("access_token")
-            }
-        })
-    }
-
-    function onMessageReceived(payload:any){
-        var chat = JSON.parse(payload.body);
-        var messageElement = document.createElement("li");
-        if(chat.type == "ENTER"){
-            messageElement.innerText = "enter";
-        }
-        else if(chat.type == "TALK"){
-            messageElement.innerText = chat.sender;
-        }
-        else if (chat.type == "LEAVE") {
-            messageElement.innerText = "leave"
-        }
-        var textElement = document.createElement('p');
-        var messageText = document.createTextNode(chat.message);
-        textElement.appendChild(messageText);
-
-        messageElement.appendChild(textElement);
-
-        console.log("Area", document.getElementById('messageArea'));
-        document.getElementById('messageArea')?.appendChild(messageElement);
-        // @ts-ignore 채팅방의 스크롤을 최하단으로 배치
-        messageArea?.current?.scrollTop = messageArea?.current?.scrollHeight;
-    }
-
-    function sendMessage(){
-        const inputElement = (document.getElementById("inputText") as HTMLInputElement);
-        const message = inputElement.value
-        stompClient.publish({
-            destination: `/app/chatroom/${roomId}/send`,
-            body: JSON.stringify({
-                roomId: roomId,
-                sender: window.localStorage.getItem("name"),
-                type: "TALK",
-                message
-            }), headers: {
-                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-            },
-        })
-        inputElement.value = "";
-    }
 
     return(
         <>
             <div>현재 방 : {roomId}</div>
-            <button onClick={connect} id={"joinArea"}>방 참가</button>
             {/*유저 목록 칸은 red background color 로 구분*/}
             <div style={{border: '1px solid red'}}>
                 <h1>현재 유저</h1>
@@ -124,7 +34,7 @@ export default function chatRoom():JSX.Element{
             </div>
             <div id = "messageArea" style={{border: '1px solid gray'}}></div>
             <div>
-                <input id={"inputText"}/><button onClick={sendMessage}>전송</button>
+                <input id={"inputText"}/><button onClick={()=>sendMessage(roomId)}>전송</button>
             </div>
         </>
     )

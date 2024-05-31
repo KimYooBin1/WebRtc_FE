@@ -1,11 +1,12 @@
 import {ChangeEvent, useEffect, useState} from "react";
 import axios from "axios";
 import {ChatRoomType} from "./mainPage.type";
-import {useMoveToPage} from "../../src/commponent/useMoveToPage";
 import {Button, Modal} from "antd";
 import {useRouter} from "next/router";
+import {useStompConnect} from "../../src/common/useStompConnect";
+import {useMoveToPage} from "../../src/commponent/useMoveToPage";
 
-export default function mainPage():JSX.Element {
+export default function MainPage():JSX.Element {
 
     const [chatRoomList, setChatRoomList] = useState([]);
     const [check, setCheck] = useState(true);
@@ -18,12 +19,15 @@ export default function mainPage():JSX.Element {
     const [signName, setSignName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
+    // const [stompClient, setStompClient]  = useRecoilState(stompClientState);
+    const {onClickMoveToPage} = useMoveToPage()
+    const {checkRoom} = useStompConnect();
 
-
-    const { onClickMoveToPage, onClickActionAndMoveToPage } = useMoveToPage();
+    // var stompClient: any = null;
     const router = useRouter();
-
     useEffect(()=>{
+        //매인화면에 접속할떄마다 모든 구독을 삭제하고 session 재실행
+        // var socket = new SockJS('http://localhost:8080/websocket');
         axios.get("http://localhost:8080/chatroom")
             .then((result)=>{console.log(result.data)
                 setChatRoomList(result.data);
@@ -66,7 +70,8 @@ export default function mainPage():JSX.Element {
             }})
             .then((result) =>{
                     console.log(result.data)
-                    router.push(`/chatRoom/${result.data.id}`);
+                    checkRoom(result.data.id)
+                    // navigator(`/chatRoom/${result.data.id}`, {state: {stompClient: stompClient}});
                 }
             )
             .catch(
@@ -181,21 +186,7 @@ export default function mainPage():JSX.Element {
             }
         );
     }
-    const checkRoom = (chatroom: ChatRoomType) => {
-        console.log(chatroom.id);
-        if(chatroom.limitUserCnt <= chatroom.userCnt){
-            alert("인원이 가득 찼습니다");
-            return ;
-        }
-        if(chatroom.password != null){
-            const result = prompt("비밀번호가 설정되어 있습니다","비밀번호를 입력해주세요");
-            if(result != chatroom.password) {
-                alert("비밀번호가 틀립니다!")
-                return;
-            }
-        }
-        router.push(`/chatRoom/${chatroom.id}`)
-    };
+
     return (
         <div>
             <h1>chatRoom 목록</h1>
@@ -203,7 +194,8 @@ export default function mainPage():JSX.Element {
                 {
                     chatRoomList.length != 0 ?
                     chatRoomList.map((chatroom:ChatRoomType) => {
-                        return <div key={chatroom.id} onClick={() =>checkRoom(chatroom)}>
+                        // return <div key={chatroom.id} onClick={() =>checkRoom(chatroom)}>
+                        return <div key={chatroom.id} onClick={() => checkRoom(chatroom)}>
                             <span>room name : {chatroom.roomName}</span>
                             <span>count : {chatroom.userCnt}/{chatroom.limitUserCnt}</span>
                         </div>;}) : "방이 없습니다"
