@@ -19,14 +19,11 @@ export default function MainPage():JSX.Element {
     const [signUsername, setSignUsername] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    // const [stompClient, setStompClient]  = useRecoilState(stompClientState);
     const {checkRoom} = useStompConnect();
 
     // var stompClient: any = null;
     const router = useRouter();
     useEffect(()=>{
-        //매인화면에 접속할떄마다 모든 구독을 삭제하고 session 재실행
-        // var socket = new SockJS('http://localhost:8080/websocket');
         axios.get("http://localhost:8080/chatroom")
             .then((result)=>{console.log(result.data)
                 setChatRoomList(result.data);
@@ -164,12 +161,12 @@ export default function MainPage():JSX.Element {
 
     };
     const onClickTest = () =>{
-        axios.get("http://localhost:8080/test").then((result) => {
+        axios.get("http://localhost:8080/test", {withCredentials : true}).then((result) => {
                 console.log(result);
             }
         ).catch((e) => {
                 console.log(e)
-                alert(e.message);
+                alert(e.response.data.message);
             }
         );
     }
