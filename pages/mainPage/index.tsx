@@ -73,7 +73,8 @@ export default function MainPage():JSX.Element {
         formData.append("username", loginName);
         formData.append("password", loginPW);
         axios.post("http://localhost:8080/login", formData).then((result)=>{
-            alert(`안녕하세요! ${result.data}님`)
+            // alert(`안녕하세요! ${result.data}님`)
+            router.push("/loginSuccess");
         }).catch((e) =>{
             alert(e.message);
         })
@@ -173,6 +174,7 @@ export default function MainPage():JSX.Element {
 
     function onNaverLogin() {
         window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        console.log("naver login")
     }
 
     return (
