@@ -6,9 +6,6 @@ import {useEffect} from "react";
 import axios from "axios";
 
 export const useStompConnect = () =>{
-    useEffect(() => {
-        console.log("hook = {}", stompClient);
-    }, []);
     const router = useRouter();
     var stompClient: CompatClient | null = null;
 
@@ -18,11 +15,7 @@ export const useStompConnect = () =>{
         var userListElement = document.getElementById("chatRoomUsers");
         if (chat.type == "ENTER" || chat.type == "LEAVE") {
             messageElement.innerText = chat.type == "ENTER"?"enter":"leave";
-            axios.get('http://localhost:8080/chatroom/' + router.query.chatRoomId + "/users", {
-                headers: {
-                    Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-                }
-            })
+            axios.get('http://localhost:8080/chatroom/' + router.query.chatRoomId + "/users", {withCredentials: true})
                 .then((result) => {
                         while(userListElement?.firstChild){
                             userListElement.removeChild(userListElement.firstChild);
@@ -50,30 +43,23 @@ export const useStompConnect = () =>{
     };
     function onConnected() {
         const roomId = router.query.chatRoomId;
-        stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived,{
-            Authorization: "Bearer " +window.localStorage.getItem("access_token")});
+        stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
         stompClient.publish({
             destination: `/app/chatroom/${roomId}/join`,
             body: JSON.stringify({
                 roomId: roomId,
                 sender: window.localStorage.getItem("name"),
-                type: "ENTER"
-            }),
-            headers:{
-                Authorization: "Bearer " +window.localStorage.getItem("access_token")
-            }
+                type: "ENTER",
+            })
         })
     }
 
     const connect = () => {
         const socket = new SockJS('http://localhost:8080/websocket');
         stompClient = Stomp.over(socket);
-        stompClient.connect({
-            Authorization: "Bearer " + window.localStorage.getItem("access_token")
-        }, () => {
+        stompClient.connect({}, () => {
             onConnected();
-        })
-
+        });
     };
 
     function sendMessage(roomId:string){
@@ -87,9 +73,7 @@ export const useStompConnect = () =>{
                 sender: window.localStorage.getItem("name"),
                 type: "TALK",
                 message
-            }), headers: {
-                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-            },
+            }, ),
         })
         inputElement.value = "";
     }

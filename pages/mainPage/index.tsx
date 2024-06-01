@@ -16,6 +16,7 @@ export default function MainPage():JSX.Element {
     const [signPW, setSignPW] = useState("");
     const [loginName, setLoginName] = useState("");
     const [signName, setSignName] = useState("");
+    const [signUsername, setSignUsername] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     // const [stompClient, setStompClient]  = useRecoilState(stompClientState);
@@ -60,10 +61,7 @@ export default function MainPage():JSX.Element {
             roomName:title,
             limitUserCnt:(document.getElementById("limitCnt") as HTMLInputElement).value,
             password
-        }, {
-            headers: {
-                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-            }})
+        })
             .then((result) =>{
                     console.log("Data = ", result.data)
                     router.push(`/chatRoom/${result.data.id}`);
@@ -79,9 +77,6 @@ export default function MainPage():JSX.Element {
         formData.append("password", loginPW);
         axios.post("http://localhost:8080/login", formData).then((result)=>{
             alert(`안녕하세요! ${result.data}님`)
-            const token = result.headers['authorization'];
-            window.localStorage.setItem("access_token", token.split(' ')[1]);
-            window.localStorage.setItem("name", result.data);
         }).catch((e) =>{
             alert(e.message);
         })
@@ -89,6 +84,8 @@ export default function MainPage():JSX.Element {
     };
     const handleSign = () => {
         axios.post("http://localhost:8080/user/sign", {
+            // TODO : username 입력 만들기
+            username:signUsername,
             name:signName,
             password:signPW,
             phoneNumber:phone,
@@ -126,11 +123,7 @@ export default function MainPage():JSX.Element {
 
     function onClickDupBtn() {
         console.log(title)
-        axios.post("http://localhost:8080/chatroom/duplication", {roomName: title}, {
-            headers: {
-                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-            }
-        })
+        axios.post("http://localhost:8080/chatroom/duplication", {roomName: title}, {withCredentials: true})
             .then((result) => {
                 console.log(result.data)
                 if (result.data) {
@@ -165,21 +158,24 @@ export default function MainPage():JSX.Element {
         else if(type == "phone"){
             setPhone(e.target.value)
         }
+        else if(type == "username"){
+            setSignUsername(e.target.value)
+        }
 
     };
     const onClickTest = () =>{
-        axios.get("http://localhost:8080/test", {
-            headers: {
-                Authorization: "Bearer " + window.localStorage.getItem("access_token"),
-            }
-        }).then((result) => {
+        axios.get("http://localhost:8080/test").then((result) => {
                 console.log(result);
             }
         ).catch((e) => {
                 console.log(e)
-                alert(e.response.data.message);
+                alert(e.message);
             }
         );
+    }
+
+    function onNaverLogin() {
+        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
     }
 
     return (
@@ -212,6 +208,7 @@ export default function MainPage():JSX.Element {
                 onCancel={handleCancel1}
                 footer={(_, { OkBtn, CancelBtn }) => (
                     <>
+                        <Button onClick={onNaverLogin}>naver login</Button>
                         <Button onClick={handleLogin}>login</Button>
                         <Button onClick={handleSign}>sign up</Button>
                         <CancelBtn />
@@ -222,6 +219,7 @@ export default function MainPage():JSX.Element {
                 password : <input type="password" onChange={(e) => {changeInput(e, "loginPW")}} value={loginPW}/><br/>
 
                 <h3>회원가입</h3>
+                username : <input value={signUsername} onChange={(e) => {changeInput(e, "username")}}/><br/>
                 name : <input value={signName} onChange={(e) => {changeInput(e, "signName")}}/><br/>
                 password : <input type="password" value={signPW} onChange={(e) => {changeInput(e, "signPW")}}/><br/>
                 email : <input value={email} onChange={(e) => {changeInput(e, "email")}}/><br/>
