@@ -78,6 +78,7 @@ export const useStompConnect = () =>{
         inputElement.value = "";
     }
     const checkRoom = (chatroom: ChatRoomType) => {
+        if(!checkLogin()) return ;
         if(chatroom.limitUserCnt <= chatroom.userCnt){
             alert("인원이 가득 찼습니다");
             return ;
@@ -98,5 +99,13 @@ export const useStompConnect = () =>{
         }
     }
 
-    return {connect, disconnect, sendMessage, checkRoom}
+    const checkLogin = (): Boolean =>{
+        if(window.localStorage.getItem("name") == null){
+            alert("로그인을 먼저 해주세요")
+            return false;
+        }
+        return true;
+    }
+
+    return {connect, disconnect, sendMessage, checkRoom, checkLogin}
 }

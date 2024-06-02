@@ -19,7 +19,7 @@ export default function MainPage():JSX.Element {
     const [signUsername, setSignUsername] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const {checkRoom} = useStompConnect();
+    const {checkRoom, checkLogin} = useStompConnect();
 
     // var stompClient: any = null;
     const router = useRouter();
@@ -36,8 +36,9 @@ export default function MainPage():JSX.Element {
     const [isModalOpen1, setIsModalOpen1] = useState(false);
 
     const showModal = (index:number) => {
+        const name = window.localStorage.getItem("name");
         if(index==1){
-            setIsModalOpen(true);
+            if(checkLogin()){ setIsModalOpen(true);}
         }
         else{
             setIsModalOpen1(true);
@@ -172,7 +173,7 @@ export default function MainPage():JSX.Element {
         );
     }
 
-    function onNaverLogin() {
+    const onNaverLogin = () => {
         window.location.href = "http://localhost:8080/oauth2/authorization/naver";
         console.log("naver login")
     }
@@ -184,7 +185,6 @@ export default function MainPage():JSX.Element {
                 {
                     chatRoomList.length != 0 ?
                     chatRoomList.map((chatroom:ChatRoomType) => {
-                        // return <div key={chatroom.id} onClick={() =>checkRoom(chatroom)}>
                         return <div key={chatroom.id} onClick={() => checkRoom(chatroom)}>
                             <span>room name : {chatroom.roomName}</span>
                             <span>count : {chatroom.userCnt}/{chatroom.limitUserCnt}</span>
