@@ -2,13 +2,18 @@ import {useRouter} from "next/router";
 import {ChatRoomType} from "../../pages/mainPage/mainPage.type";
 import SockJS from "sockjs-client";
 import {CompatClient, Stomp} from "@stomp/stompjs";
-import {useEffect} from "react";
 import axios from "axios";
 
 export const useStompConnect = () =>{
     const router = useRouter();
     var stompClient: CompatClient | null = null;
 
+    const errorMessageReceived = (payload: any) => {
+        var chat = JSON.parse(payload.body);
+        alert(chat.message);
+        router.push("/mainPage");
+        stompClient?.disconnect();
+    }
     const onMessageReceived = (payload: any) => {
         var chat = JSON.parse(payload.body);
         var messageElement = document.createElement("li");
@@ -41,10 +46,12 @@ export const useStompConnect = () =>{
         }, 100);
 
     };
-    function onConnected() {
+    const onConnected = () => {
         const roomId = router.query.chatRoomId;
-        stompClient.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
-        stompClient.publish({
+        stompClient?.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
+        // TODO : MessageReceived 분리
+        stompClient?.subscribe('/user/topic/error', errorMessageReceived);
+        stompClient?.publish({
             destination: `/app/chatroom/${roomId}/join`,
             body: JSON.stringify({
                 roomId: roomId,
@@ -66,7 +73,7 @@ export const useStompConnect = () =>{
         const inputElement = (document.getElementById("inputText") as HTMLInputElement);
         const message = inputElement.value
         console.log("chatroom SC = {}",stompClient)
-        stompClient.publish({
+        stompClient?.publish({
             destination: `/app/chatroom/${roomId}/send`,
             body: JSON.stringify({
                 roomId: roomId,
