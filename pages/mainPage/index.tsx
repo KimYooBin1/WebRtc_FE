@@ -24,7 +24,7 @@ export default function MainPage():JSX.Element {
     // var stompClient: any = null;
     const router = useRouter();
     useEffect(()=>{
-        axios.get("http://localhost:8080/chatroom")
+        axios.get("https://localhost/chatroom")
             .then((result)=>{console.log(result.data)
                 setChatRoomList(result.data);
                 console.log(chatRoomList.length);
@@ -55,7 +55,7 @@ export default function MainPage():JSX.Element {
         setTitle("");
         setPassword("");
         setCheckDup(false);
-        axios.post("http://localhost:8080/chatroom", {
+        axios.post("https://localhost/chatroom", {
             roomName:title,
             limitUserCnt:(document.getElementById("limitCnt") as HTMLInputElement).value,
             password
@@ -73,7 +73,7 @@ export default function MainPage():JSX.Element {
         const formData = new FormData();
         formData.append("username", loginName);
         formData.append("password", loginPW);
-        axios.post("http://localhost:8080/login", formData).then((result)=>{
+        axios.post("https://localhost/login", formData, {withCredentials:true}).then((result)=>{
             // alert(`안녕하세요! ${result.data}님`)
             router.push("/loginSuccess");
         }).catch((e) =>{
@@ -82,8 +82,7 @@ export default function MainPage():JSX.Element {
         setIsModalOpen1(false);
     };
     const handleSign = () => {
-        axios.post("http://localhost:8080/user/sign", {
-            // TODO : username 입력 만들기
+        axios.post("https://localhost/user/sign", {
             username:signUsername,
             name:signName,
             password:signPW,
@@ -122,7 +121,7 @@ export default function MainPage():JSX.Element {
 
     function onClickDupBtn() {
         console.log(title)
-        axios.post("http://localhost:8080/chatroom/duplication", {roomName: title}, {withCredentials: true})
+        axios.post("https://localhost/chatroom/duplication", {roomName: title}, {withCredentials: true})
             .then((result) => {
                 console.log(result.data)
                 if (result.data) {
@@ -163,7 +162,7 @@ export default function MainPage():JSX.Element {
 
     };
     const onClickTest = () =>{
-        axios.get("http://localhost:8080/test", {withCredentials : true}).then((result) => {
+        axios.get("https://localhost/test", {withCredentials : true}).then((result) => {
                 console.log(result);
             }
         ).catch((e) => {
@@ -174,7 +173,7 @@ export default function MainPage():JSX.Element {
     }
 
     const onNaverLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        window.location.href = "https://localhost/oauth2/authorization/naver";
         console.log("naver login")
     }
 

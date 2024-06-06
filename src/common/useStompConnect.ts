@@ -3,11 +3,12 @@ import {ChatRoomType} from "../../pages/mainPage/mainPage.type";
 import SockJS from "sockjs-client";
 import {CompatClient, Stomp} from "@stomp/stompjs";
 import axios from "axios";
+import {Cookies} from "react-cookie";
 
 export const useStompConnect = () =>{
     const router = useRouter();
     var stompClient: CompatClient | null = null;
-
+    const cookie = new Cookies();
     const errorMessageReceived = (payload: any) => {
         var chat = JSON.parse(payload.body);
         alert(chat.message);
@@ -20,7 +21,7 @@ export const useStompConnect = () =>{
         var userListElement = document.getElementById("chatRoomUsers");
         if (chat.type == "ENTER" || chat.type == "LEAVE") {
             messageElement.innerText = chat.type == "ENTER"?"enter":"leave";
-            axios.get('http://localhost:8080/chatroom/' + router.query.chatRoomId + "/users", {withCredentials: true})
+            axios.get('https://localhost/chatroom/' + router.query.chatRoomId + "/users", {withCredentials: true})
                 .then((result) => {
                         while(userListElement?.firstChild){
                             userListElement.removeChild(userListElement.firstChild);
@@ -62,7 +63,7 @@ export const useStompConnect = () =>{
     }
 
     const connect = () => {
-        const socket = new SockJS('http://localhost:8080/websocket');
+        const socket = new SockJS('https://localhost/websocket');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, () => {
             onConnected();
@@ -107,7 +108,9 @@ export const useStompConnect = () =>{
     }
 
     const checkLogin = (): Boolean =>{
-        if(window.localStorage.getItem("name") == null){
+        const token = cookie.get("Authorization");
+        console.log("token = ",token)
+        if(window.localStorage.getItem("name") == null || token == null){
             alert("로그인을 먼저 해주세요")
             return false;
         }

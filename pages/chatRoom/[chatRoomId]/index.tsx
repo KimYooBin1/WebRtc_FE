@@ -5,6 +5,10 @@ import {useStompConnect} from "../../../src/common/useStompConnect";
 
 export default function chatRoom():JSX.Element{
     useEffect(() => {
+        if(!checkLogin()){
+            router.push("/mainPage");
+            return;
+        }
         connect();
         console.log("room join");
         const listenBackEvent = () => {
@@ -21,7 +25,7 @@ export default function chatRoom():JSX.Element{
 
     const router = useRouter();
     const roomId = router.query.chatRoomId;
-    const {sendMessage, connect, disconnect} = useStompConnect();
+    const {sendMessage, connect, disconnect, checkLogin} = useStompConnect();
 
 
 
