@@ -2,10 +2,11 @@ import {useRouter} from "next/router";
 import {useEffect} from "react";
 import {history} from "../../../src/commponent/history"
 import {useStompConnect} from "../../../src/common/useStompConnect";
+import {useErrorHook} from "../../../src/common/useErrorHook";
 
 export default function chatRoom():JSX.Element{
     useEffect(() => {
-        if(!checkLogin()){
+        if(!checkLogin() || !checkConnect(roomId)){
             router.push("/mainPage");
             return;
         }
@@ -26,6 +27,7 @@ export default function chatRoom():JSX.Element{
     const router = useRouter();
     const roomId = router.query.chatRoomId;
     const {sendMessage, connect, disconnect, checkLogin} = useStompConnect();
+    const {checkConnect} = useErrorHook();
 
 
 

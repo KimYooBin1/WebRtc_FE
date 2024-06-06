@@ -49,8 +49,8 @@ export const useStompConnect = () =>{
     };
     const onConnected = () => {
         const roomId = router.query.chatRoomId;
+        console.log("roomId = ",roomId)
         stompClient?.subscribe('/topic/chatroom/' + roomId, onMessageReceived);
-        // TODO : MessageReceived 분리
         stompClient?.subscribe('/user/topic/error', errorMessageReceived);
         stompClient?.publish({
             destination: `/app/chatroom/${roomId}/join`,
@@ -73,6 +73,10 @@ export const useStompConnect = () =>{
     function sendMessage(roomId:string){
         const inputElement = (document.getElementById("inputText") as HTMLInputElement);
         const message = inputElement.value
+        if(message == null || message == ""){
+            alert("메시지를 입력해주세요")
+            return ;
+        }
         console.log("chatroom SC = {}",stompClient)
         stompClient?.publish({
             destination: `/app/chatroom/${roomId}/send`,

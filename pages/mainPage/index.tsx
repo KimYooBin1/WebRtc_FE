@@ -36,9 +36,10 @@ export default function MainPage():JSX.Element {
     const [isModalOpen1, setIsModalOpen1] = useState(false);
 
     const showModal = (index:number) => {
-        const name = window.localStorage.getItem("name");
         if(index==1){
-            if(checkLogin()){ setIsModalOpen(true);}
+            if(checkLogin()){
+                setIsModalOpen(true);
+            }
         }
         else{
             setIsModalOpen1(true);
@@ -65,19 +66,20 @@ export default function MainPage():JSX.Element {
                     router.push(`/chatRoom/${result.data.id}`);
                 }
             )
-            .catch(
-                // TODO : error 처리
+            .catch((e) =>{
+                    alert(e.response.data.message)
+                }
             )
     };
     const handleLogin = () => {
         const formData = new FormData();
         formData.append("username", loginName);
         formData.append("password", loginPW);
-        axios.post("https://localhost/login", formData, {withCredentials:true}).then((result)=>{
+        axios.post("https://localhost/login", formData, {withCredentials:true}).then(()=>{
             // alert(`안녕하세요! ${result.data}님`)
             router.push("/loginSuccess");
         }).catch((e) =>{
-            alert(e.message);
+            alert(e.response.data.message);
         })
         setIsModalOpen1(false);
     };
@@ -91,7 +93,7 @@ export default function MainPage():JSX.Element {
         }).then(()=>{
             alert("회원가입이 정상적으로 진행되었습니다")
         }).catch((e) => {
-            alert(e.message)
+            alert(e.response.data.message)
         })
         setIsModalOpen1(false);
     };
@@ -101,6 +103,8 @@ export default function MainPage():JSX.Element {
         setTitle("");
         setPassword("");
         setCheckDup(false);
+        //@ts-ignore
+        document.getElementById("titleInput").removeAttribute("disabled");
     };
     const handleCancel1 = () => {
         setIsModalOpen1(false);
@@ -127,13 +131,16 @@ export default function MainPage():JSX.Element {
                 if (result.data) {
                     setCheckDup(true);
                     alert("사용 가능한 chatroom name 입니다")
+                    // @ts-ignore
+                    document.getElementById("titleInput").setAttribute("disabled", "true");
                 } else {
                     setCheckDup(false);
                     alert("중복된 chatroom name 입니다")
                 }
             })
-            .catch(
-
+            .catch((e) => {
+                    alert(e.response.data.message)
+                }
             );
     }
 
@@ -177,6 +184,14 @@ export default function MainPage():JSX.Element {
         console.log("naver login")
     }
 
+    function onClickUser() {
+        axios.get("https://localhost/user", {withCredentials: true}).then((result) => {
+            alert("현재 유저이름은 " + result.data.name);
+        }).catch((e) => {
+            alert(e.response.data.message)
+        })
+    }
+
     return (
         <div>
             <h1>chatRoom 목록</h1>
@@ -193,6 +208,7 @@ export default function MainPage():JSX.Element {
             <button onClick={() => showModal(1)}>계시글 등록</button>
             <button onClick={() => showModal(2)}>login</button>
             <button onClick={onClickTest}>Error Response test</button>
+            <button onClick={onClickUser}>user정보 확인</button>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <input id = {"titleInput"} placeholder={"방이름"} value={title} onChange={changeTitle}/><button onClick={onClickDupBtn}>중복 체크</button><br/>
                 <input type="checkbox" onChange={checkBox}/>비밀번호 여부<br/>
@@ -204,7 +220,7 @@ export default function MainPage():JSX.Element {
                 open={isModalOpen1}
                 title="로그인"
                 onCancel={handleCancel1}
-                footer={(_, { OkBtn, CancelBtn }) => (
+                footer={(_, {  CancelBtn }) => (
                     <>
                         <Button onClick={onNaverLogin}>naver login</Button>
                         <Button onClick={handleLogin}>login</Button>
