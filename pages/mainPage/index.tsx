@@ -60,13 +60,14 @@ export default function MainPage():JSX.Element {
             roomName:title,
             limitUserCnt:(document.getElementById("limitCnt") as HTMLInputElement).value,
             password
-        })
+        }, {withCredentials:true})
             .then((result) =>{
                     console.log("Data = ", result.data)
                     router.push(`/chatRoom/${result.data.id}`);
                 }
             )
             .catch((e) =>{
+                    console.log("error")
                     alert(e.response.data.message)
                 }
             )
