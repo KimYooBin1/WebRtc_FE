@@ -6,7 +6,7 @@ export default function App({ Component, pageProps }:AppProps):JSX.Element {
     return<>
         <CookiesProvider>
             <RecoilRoot>
-                <Component {...pageProps} />;
+                <Component {...pageProps} />
             </RecoilRoot>
         </CookiesProvider>
     </>
