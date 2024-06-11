@@ -137,7 +137,7 @@ export default function MainPage():JSX.Element {
                         </div>;}) : "방이 없습니다"
                 }
             </div>
-            <button onClick={showModal}>계시글 등록</button>
+            <button onClick={showModal}>채팅방 등록</button>
             <button onClick={onClickTest}>Error Response test</button>
             <button onClick={onClickUser}>user정보 확인</button>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
