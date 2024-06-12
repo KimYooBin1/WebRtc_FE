@@ -102,7 +102,7 @@ export const useStompConnect = () =>{
                 return;
             }
         }
-        router.push(`/chatRoom/${chatroom.id}`);
+        router.push(`/webrtc/${chatroom.id}`);
     }
 
     const disconnect = () => {
