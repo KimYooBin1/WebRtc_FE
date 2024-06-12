@@ -1,7 +1,21 @@
 import {useRouter} from "next/router";
 import {useEffect} from "react";
+import {history} from "../../../src/commponent/history";
+import {log} from "util";
 
 export default function WebrtcRoom () {
+    useEffect(() => {
+        const listenBackEvent = () => {
+            // 뒤로가기 할 때 수행할 동작을 적는다
+            alert("채팅방이 종료 됩니다")
+            stop();
+        };
+        return history.listen(({action}) => {
+            if (action === "POP") {
+                listenBackEvent();
+            }
+        });
+    },[]);
     const router = useRouter();
     //WebRTC stun server
     const peerConnectionConfig = {
@@ -89,7 +103,19 @@ export default function WebrtcRoom () {
         socket.onerror = (err) => {
             console.log("socket error: " + err);
         }
+    }
 
+    function  stop() {
+        // send a message to the server to remove this client from the room clients list
+        console.log("Send 'leave' message to server");
+        sendToServer({
+            from: window.localStorage.getItem("name"),
+            type: 'leave',
+            data: router.query.roomId
+        });
+        // if(socket != null)
+        console.log("socket = ",socket);
+        socket.close();
     }
 
 
@@ -143,6 +169,12 @@ export default function WebrtcRoom () {
         });
         console.log("video off")
     }
+
+    const onClickLeave = () => {
+        stop();
+        router.push("/webrtc");
+    }
+
     return (
         <>
             <div>현재 방 : {router.query.roomId}</div>
@@ -153,6 +185,7 @@ export default function WebrtcRoom () {
                 <button onClick={videoOff}>video off</button>
                 <video id={"peer-video"} autoPlay={true}></video>
             </div>
+            <button onClick={onClickLeave}>나기기</button>
         </>
     )
 }
