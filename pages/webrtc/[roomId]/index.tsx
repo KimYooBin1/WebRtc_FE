@@ -63,8 +63,25 @@ export default function WebrtcRoom () {
         createPeerConnection();
         getMedia(mediaConstraints);
         if(message.data === "true"){
-            // myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+            myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
         }
+    }
+
+    //기존에 한 peer가 room에 있고 다른 peer가 join 요청을 했을때 실행
+    const handleNegotiationNeededEvent = () => {
+        //offer 생성수 localDescription에 저장
+        myPeerConnection.createOffer().then((offer) => {
+            return myPeerConnection.setLocalDescription(offer);
+        }).then(() => {
+            //서버에 offer 전달
+            sendToServer({
+                from: window.localStorage.getItem("name"),
+                type: "offer",
+                sdp: myPeerConnection.localDescription
+            });
+        }).catch((e) => {
+            console.log("error", e);
+        });
     }
 
     const createPeerConnection = () => {
@@ -83,7 +100,7 @@ export default function WebrtcRoom () {
             sendToServer({
                 from: window.localStorage.getItem("name"),
                 type: "ice",
-                data: event.candidate
+                candidate: event.candidate
             });
         }
     }
