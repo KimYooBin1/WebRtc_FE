@@ -1,6 +1,7 @@
 import {useRouter} from "next/router";
 import {useEffect} from "react";
 import {history} from "../../../src/commponent/history";
+import {message} from "antd";
 
 export default function WebrtcRoom () {
     // @ts-ignore
@@ -106,6 +107,7 @@ export default function WebrtcRoom () {
     }
     const handleTrackEvent = (event:any) => {
         console.log("track event: ", event);
+        console.log("remoteVideo = ",remoteVideo)
         remoteVideo.srcObject = event.streams[0];
     };
     const getMedia = (mediaConstraints: { audio: boolean; video: boolean }) => {
@@ -115,6 +117,7 @@ export default function WebrtcRoom () {
                 track.stop();
             });
         }
+        //기기의 미디어를 가져온다
         navigator.mediaDevices.getUserMedia(mediaConstraints).then(getLocalMediaStream).catch(handleGetUserMediaError);
     }
     const getLocalMediaStream = (mediaStream:MediaStream) => {
@@ -145,6 +148,60 @@ export default function WebrtcRoom () {
         stop();
     }
 
+    const handleOfferMessage = (message:any) => {
+        console.log("Accepting offer");
+        console.log("message", message);
+        let desc = new RTCSessionDescription(message.sdp);
+        if(desc != null && message.sdp != null){
+            console.log("RTC Signalling state: ", myPeerConnection.signalingState);
+            myPeerConnection.setRemoteDescription(desc).then(() =>{
+                console.log("Set up local media stream");
+                return navigator.mediaDevices.getUserMedia(mediaConstraints);
+            })
+                .then((stream) => {
+                    console.log("-- Local video stream obtained");
+                    localStream = stream;
+                    try{
+                        localVideo.srcObject = localStream;
+                    }catch (error){
+                        localVideo.src = window.URL.createObjectURL(stream);
+                    }
+                    console.log("-- Adding stream to the RTCPeerConnection");
+                    localStream.getTracks().forEach((track) => {
+                        myPeerConnection.addTrack(track, localStream);
+                    });
+                }).then(() =>{
+                    console.log("-- Creating answer");
+                    return myPeerConnection.createAnswer()
+            }).then((answer) => {
+                console.log("-- Setting local description after creating answer");
+                return myPeerConnection.setLocalDescription(answer);
+            }).then(() => {
+                console.log("-- Sending answer to caller");
+                sendToServer({
+                    from: window.localStorage.getItem("name"),
+                    type: "answer",
+                    sdp: myPeerConnection.localDescription
+                });
+            })
+        }
+    }
+
+    const handleNewIceCandidateMessage = (message:any) =>{
+        let candidate = new RTCIceCandidate(message.candidate);
+        console.log("Adding received ICE candidate: " + JSON.stringify(candidate));
+        myPeerConnection.addIceCandidate(candidate).catch((e) => {
+            console.log(e);
+        });
+    }
+
+    const handleAnswerMessage = (message:any) => {
+        const sdp = new RTCSessionDescription(message.sdp);
+        myPeerConnection.setRemoteDescription(sdp).catch((e) => {
+            console.log("error", e);
+        })
+    }
+
     // socket listener 설정
     const start = () => {
         // 해당 소켓을 사용해서 message를 받는다.
@@ -156,15 +213,15 @@ export default function WebrtcRoom () {
                     break;
                 case "offer":
                     console.log("offer message received: " + message.data);
-                    // handleOfferMessage(message);
+                    handleOfferMessage(message);
                     break;
                 case "answer":
                     console.log("answer message received: " + message.data);
-                    // handleAnswerMessage(message);
+                    handleAnswerMessage(message);
                     break;
                 case "ice":
                     console.log("ice message received: " + message.data);
-                    // handleIceMessage(message);
+                    handleNewIceCandidateMessage(message);
                     break;
                 case "join":
                     console.log('Client is starting to ' + (message.data === "true)" ? 'negotiate' : 'wait for a peer'));
@@ -238,22 +295,6 @@ export default function WebrtcRoom () {
                 socket.close();
             }
         }
-    }
-
-
-    // offer 생성
-    const createOffer = async () => {
-        const peerConnection = new RTCPeerConnection();
-        // option
-        const option = {
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-            iceRestart: true
-        }
-        const offer = await peerConnection.createOffer(option);
-
-        await peerConnection.setLocalDescription(offer);
-        console.log(offer.sdp);
     }
 
     const videoOn = () => {
