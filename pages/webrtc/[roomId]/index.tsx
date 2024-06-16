@@ -5,13 +5,16 @@ import {message} from "antd";
 
 export default function WebrtcRoom () {
     // @ts-ignore
-    let socket = null;
+    let socket: any = null;
 
     //webRtc variables
     let localStream: MediaStream;
     let remoteVideo: any = null;
     let localVideo: any = null;
     let myPeerConnection: RTCPeerConnection;
+    // media track store : video on/off
+    // TODO : 하지만 실제로 stream 전송되는것을 막고 싶다.
+    let localVideoTracks: any = null;
 
     const router = useRouter();
 
@@ -264,7 +267,6 @@ export default function WebrtcRoom () {
         // event listener를 제거
         if (myPeerConnection) {
             console.log('Close the RTCPeerConnection');
-
             // disconnect all our event listeners
             myPeerConnection.onicecandidate = null;
             myPeerConnection.ontrack = null;
@@ -299,15 +301,16 @@ export default function WebrtcRoom () {
 
     const videoOn = () => {
         // TODO : 왜 videoOff 를 하고 On을 하면 작동을 안하는지
-        console.log("localStream = ",localStream.getVideoTracks())
-        localStream.getVideoTracks().forEach((track) => {
+        console.log("localStream = ",localVideoTracks)
+        localVideoTracks.forEach((track) => {
             localStream.addTrack(track);
         });
         console.log("video on")
     }
     const videoOff = () => {
-        console.log("localStream = ",localStream)
-        localStream.getVideoTracks().forEach((track) => {
+        localVideoTracks = localStream.getVideoTracks();
+        console.log("localStream = ",localVideoTracks)
+        localVideoTracks.forEach((track: any) => {
             localStream.removeTrack(track);
         });
         console.log("video off")
