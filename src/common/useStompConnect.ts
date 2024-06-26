@@ -63,11 +63,20 @@ export const useStompConnect = () =>{
     }
 
     const connect = () => {
-        const socket = new SockJS('https://localhost/websocket');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
-            onConnected();
-        });
+        axios.get("https://localhost/user", {withCredentials:true}).then(
+            ()=>{
+                const socket = new SockJS('https://localhost/websocket');
+                console.log("socket = ",socket)
+                stompClient = Stomp.over(socket);
+                stompClient.connect({}, () => {
+                    onConnected();
+                })
+            }
+        ).catch((error:any)=>{
+                alert("로그인을 먼저 해주세요")
+                router.push("/mainPage");
+            }
+        )
     };
 
     function sendMessage(roomId:string){
@@ -102,7 +111,7 @@ export const useStompConnect = () =>{
                 return;
             }
         }
-        router.push(`/webrtc/${chatroom.id}`);
+        router.push(`/chatRoom/${chatroom.id}`);
     }
 
     const disconnect = () => {

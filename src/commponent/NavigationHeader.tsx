@@ -49,7 +49,7 @@ export const NavigationHeader = () => {
             // alert(`안녕하세요! ${result.data}님`)
             router.push("/loginSuccess");
         }).catch((e) =>{
-            alert(e.response.data.message);
+            alert("아이디나 비밀번호가 잘못됬습니다");
         })
         setIsModalOpen1(false);
     };

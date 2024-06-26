@@ -98,6 +98,15 @@ export default function WebrtcMainPage () {
         setCheck((prop) => !prop);
         setPassword("");
     }
+
+    const showMemory = () => {
+        axios.get("https://localhost/stream/memory")
+            .then((result) => {
+                console.log(result.data)
+            }
+        )
+    };
+
     return (
         <>
             <NavigationHeader/>
@@ -113,6 +122,7 @@ export default function WebrtcMainPage () {
                 }
             </div>
             <button onClick={showModal}>채팅방 등록</button>
+            <button onClick={showMemory}>in-memory 채팅방 확인</button>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <input id = {"titleInput"} placeholder={"방이름"} value={title} onChange={changeTitle}/><button onClick={onClickDupBtn}>중복 체크</button><br/>
                 <input type="checkbox" onChange={checkBox}/>비밀번호 여부<br/>
